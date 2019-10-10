@@ -1,7 +1,7 @@
 {
   "name": "conduit-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "Conduit is a custom Minecraft server written from the ground up in NodeJS",
   "main": "index.js",
   "scripts": {
     "lint": "./node_modules/.bin/eslint .",
