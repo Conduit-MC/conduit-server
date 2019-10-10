@@ -1,7 +1,7 @@
-const { Writable } = require('stream');
 const MCServerError = require('./errors/mcserver.error');
 
-class BufferStream {
+class BufferStreamReadable {
+
 	constructor(buffer) {
 		this._buffer = buffer;
 		this._position = 0;
@@ -10,9 +10,6 @@ class BufferStream {
 	data() {
 		return this._buffer;
 	}
-}
-
-class BufferStreamReadable extends BufferStream {
 
 	hasNextData() {
 		return this._buffer.length > this._position;
@@ -157,18 +154,17 @@ class BufferStreamReadable extends BufferStream {
 	}
 }
 
-// I am 100% sure this can be done in a MUCH better way, but this works
-// TODO: Fix this and make it better
-class BufferStreamWritable extends BufferStream {
+class BufferStreamWritable {
 	constructor() {
-		super(Buffer.alloc(0));
+		this._chunks = [];
+	}
+
+	data() {
+		return Buffer.concat(this._chunks);
 	}
 
 	write(buffer) {
-		this._buffer = Buffer.concat([
-			this._buffer,
-			buffer
-		]);
+		this._chunks.push(buffer);
 	}
 
 	appendBufferLength(length) {
@@ -176,61 +172,59 @@ class BufferStreamWritable extends BufferStream {
 	}
 
 	writeByte(value) {
-		this._buffer[this._position] = value;
-		this._position++;
+		const buffer = Buffer.alloc(1);
+		buffer[0] = value;
+
+		this.write(buffer);
 	}
 
 	writeInt8(value) {
-		this.appendBufferLength(1);
+		const buffer = Buffer.alloc(1);
+		buffer.writeInt8(value);
 
-		this._buffer.writeInt8(value, this._position);
-
-		this._position++;
+		this.write(buffer);
 	}
 
 	writeUInt8(value) {
-		this.appendBufferLength(1);
+		const buffer = Buffer.alloc(1);
+		buffer.writeUInt8(value);
 
-		this._buffer.writeUInt8(value, this._position);
-
-		this._position++;
+		this.write(buffer);
 	}
 
 	writeInt64BE(value) {
-		this.appendBufferLength(8);
+		const buffer = Buffer.alloc(8);
 
-		this._buffer.writeInt32BE(value >> 8, this._position);
-		this._buffer.writeInt32BE(value & 0xFF, this._position + 4);
+		buffer.writeInt32BE(value >> 8);
+		buffer.writeInt32BE(value & 0xFF, 4);
 
-		this._position += 8;
+		this.write(buffer);
 	}
 
 	writeInt32BE(value) {
-		this.appendBufferLength(4);
+		const buffer = Buffer.alloc(4);
+		buffer.writeInt32BE(value);
 
-		this._buffer.writeInt32BE(value, this._position);
-
-		this._position += 4;
+		this.write(buffer);
 	}
 
 	writeFloatBE(value) {
-		this.appendBufferLength(4);
+		const buffer = Buffer.alloc(4);
+		buffer.writeFloatBE(value);
 
-		this._buffer.writeFloatBE(value, this._position);
-
-		this._position += 4;
+		this.write(buffer);
 	}
 	
 	writeDoubleBE(value) {
-		this.appendBufferLength(8);
+		const buffer = Buffer.alloc(8);
+		buffer.writeDoubleBE(value);
 
-		this._buffer.writeDoubleBE(value, this._position);
-
-		this._position += 8;
+		this.write(buffer);
 	}
 
 	writeVarInt(value) {
-		this.appendBufferLength(varIntSize(value));
+		const buffer = Buffer.alloc(varIntSize(value));
+		let offset = 0;
 
 		do {
 			let temp = value & 0b01111111;
@@ -240,19 +234,20 @@ class BufferStreamWritable extends BufferStream {
 				temp |= 0b10000000;
 			}
 
-			this.writeByte(temp);
+			buffer[offset] = temp;
+			offset++;
 		} while (value != 0);
+
+		this.write(buffer);
 	}
 
 	writeString(value) {
 		const length = Buffer.byteLength(value);
+		const buffer = Buffer.alloc(length);
+		buffer.write(value);
 
 		this.writeVarInt(length);
-		this.appendBufferLength(length);
-
-		this._buffer.write(value, this._position);
-
-		this._position += length;
+		this.write(buffer);
 	}
 
 	writeBool(value) {
@@ -260,10 +255,12 @@ class BufferStreamWritable extends BufferStream {
 	}
 
 	writePosition(data) {
-		this.writeInt32BE((data.x & 0x3FFFFFF) << 6 | (data.y >>> 6));
-		this.writeInt32BE(((data.y & 0b111111) << 26) | (data.z & 0x3FFFFFF));
+		const buffer = Buffer.alloc(8);
 
-		this._position += 8;
+		buffer.writeInt32BE((data.x & 0x3FFFFFF) << 6 | (data.y >>> 6));
+		buffer.writeInt32BE(((data.y & 0b111111) << 26) | (data.z & 0x3FFFFFF), 4);
+
+		this.write(buffer);
 	}
 }
 
