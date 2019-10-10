@@ -1,6 +1,6 @@
 {
   "name": "conduit-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Conduit is a custom Minecraft server written from the ground up in NodeJS",
   "main": "index.js",
   "scripts": {
