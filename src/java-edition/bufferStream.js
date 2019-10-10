@@ -1,3 +1,4 @@
+const { Writable } = require('stream');
 const MCServerError = require('./errors/mcserver.error');
 
 class BufferStream {
@@ -12,6 +13,10 @@ class BufferStream {
 }
 
 class BufferStreamReadable extends BufferStream {
+
+	hasNextData() {
+		return this._buffer.length > this._position;
+	}
 
 	seek(pos) {
 		this._position = pos;

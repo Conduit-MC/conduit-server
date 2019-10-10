@@ -1,6 +1,6 @@
 const crypto = require('crypto');
 const UUID1345 = require('uuid-1345');
-const DATA_TYPES = require('./data_types');
+const { BufferStreamReadable } = require('./bufferStream');
 
 function offlineUUID(username) {
 	const md5 = crypto.createHash('md5');
@@ -48,13 +48,16 @@ function packetNameToProtocolID(set, name) {
 
 function splitPacketStream(buffer) {
 	const output = [];
-	let offset = 0;
-	while (offset < buffer.length) {
-		const section_length = DATA_TYPES.varint.read(buffer, offset);
-		const section_length_size = DATA_TYPES.varint.size(section_length);
-		output.push(buffer.slice(offset, offset + section_length_size + section_length));
+	const stream = new BufferStreamReadable(buffer);
 
-		offset += (section_length_size + section_length);
+	while (stream.hasNextData()) {
+		// Using the stream moves the position forward when reading
+		const length = stream.readVarInt();
+		const size = varIntSize(length);
+
+		stream.skip(-size); // Move back to the start of the packet
+
+		output.push(stream.read(size + length)); // Read out the full packet
 	}
 	
 	return output;
@@ -76,4 +79,14 @@ function intToHexStr(int) {
 	}
 
 	return '0x' + str;
+}
+
+function varIntSize(value) {
+	let size = 0;
+	while (value & -0b10000000) {
+		value >>>= 7;
+		size++;
+	}
+	
+	return size + 1;
 }
