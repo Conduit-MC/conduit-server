@@ -37,7 +37,7 @@ Not started
 # Setup
 
 You can customize the server by passing in several settings into the server object.
-> ## new NodecraftServer(version, [settings]);
+> ## new JavaEditionServer(version, [settings]);
 ## Params:
 > - version: Minecraft version (IE, `1.12.2`)
 > - settings: Optional. Minecraft server settings. Supports all vanilla settings, using underscores (_) instead of hyphens (-) (`allow-flight` becomes `allow_flight`)
