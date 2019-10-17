@@ -96,7 +96,6 @@ function login(client) {
 		username: client.username
 	});
 	client.state = STATES.PLAY;
-	this.server.players.push(client);
 
 	client.emit('login');
 }

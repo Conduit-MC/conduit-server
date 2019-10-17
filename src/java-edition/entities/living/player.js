@@ -31,6 +31,8 @@ class Player extends Entity {
 	}
 
 	joinGame() {
+		this.server.players[this.getUUID()] = this;
+
 		this.write('login', {
 			entityId: this.getEntityId(),
 			levelType: 'default',

@@ -108,7 +108,7 @@ class MCServer extends EventEmitter {
 		this.tcp_server.on('connection', this.constructor.handleTCPConnection.bind(this));
 
 		this.connected_clients = []; // connect socket clients (not only player clients)
-		this.players = []; // connected player clients
+		this.players = {}; // connected player clients
 		this.current_eid = 0; // incrementing entity ID
 		
 		if (this.properties.enable_rcon) { // enable RCON protocol if needed
@@ -337,11 +337,14 @@ class MCServer extends EventEmitter {
 	}
 
 	broadcast(name, data, except) {
-		for (const player of this.players) {
+		for (const uuid in this.players) {
+			const player = this.players[uuid];
+
 			if (except && player.id === except.id) {
 				continue;
 			}
 
+			console.log('writing', name, 'to player', player.getUsername());
 			player.write(name, data);
 		}
 	}
