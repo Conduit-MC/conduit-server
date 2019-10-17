@@ -21,7 +21,7 @@
     "node-rsa": "^0.4.2",
     "prismarine-chunk": "^1.11.0",
     "uuid-1345": "^0.99.6",
-    "uuid-buffer": "^1.0.3"
+    "uuid-parse": "^1.1.0"
   },
   "devDependencies": {
     "eslint": "^5.16.0"

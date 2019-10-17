@@ -68,7 +68,8 @@ module.exports = {
 	protocolIDToName, protocolIDToPrefixedName,
 	getProtocolIDStruct,
 	packetNameToProtocolID,
-	splitPacketStream
+	splitPacketStream,
+	varIntSize
 };
 
 function intToHexStr(int) {

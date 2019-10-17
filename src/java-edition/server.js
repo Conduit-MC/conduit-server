@@ -109,7 +109,7 @@ class MCServer extends EventEmitter {
 
 		this.connected_clients = []; // connect socket clients (not only player clients)
 		this.players = []; // connected player clients
-		this.current_client_id = 0; // incrementing client ID (TODO: change this to be more random to prevent EID conflicts)
+		this.current_eid = 0; // incrementing entity ID
 		
 		if (this.properties.enable_rcon) { // enable RCON protocol if needed
 			this.RCON = new RCON(this.properties.rcon);
@@ -275,9 +275,7 @@ class MCServer extends EventEmitter {
 		// Create a new Client with the TCP socket
 		const client = new Client(socket, this);
 
-		client.id = this.current_client_id++; // Increment the client ID
-
-		this.connected_clients[client.id] = client; // Store client
+		this.connected_clients[client.getEntityId()] = client; // Store client
 
 		// Track ALL events sent by the client (including all packets to be handled by plugins)
 		client.onAny((name, ...data) => {
@@ -332,6 +330,20 @@ class MCServer extends EventEmitter {
 				//keepAliveId: bignum(9223372036854775807).rand().toNumber()
 			});
 		}, 20000); // wiki.vg states to send this every 30 seconds, lets send it every 20 just to be safe
+	}
+
+	nextEntityId() {
+		return ++this.current_eid;
+	}
+
+	broadcast(name, data, except) {
+		for (const player of this.players) {
+			if (except && player.id === except.id) {
+				continue;
+			}
+
+			player.write(name, data);
+		}
 	}
 }
 

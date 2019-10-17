@@ -9,11 +9,7 @@ const { BufferStreamReadable, BufferStreamWritable } = require('./bufferStream')
 // Client represents a TCP connection, but not necessarily a player though it almost always is
 class Client extends Player {
 	constructor(socket, server) {
-		super();
-
-		this.server = server; // Keep reference to the server
-
-		this.id = -1; // Base client ID, will be changed immediately after creation
+		super(server);
 
 		this.socket = socket; // TCP socket
 		this.socket.setNoDelay(true); // Disable Nagle algorithm
@@ -100,6 +96,18 @@ class Client extends Player {
 						case 'position':
 							packetData.writePosition(data[key]);
 							break;
+						case 'buffer':
+							packetData.writeBuffer(data[key], definition.options);
+							break;
+						case 'array':
+							packetData.writeArray(data[key], definition.options, data);
+							break;
+						case 'UUID':
+							packetData.writeUUID(data[key]);
+							break;
+						case 'switch':
+							packetData.writeSwitch(data[key], definition.options, data);
+							break;
 						case 'i8':
 							packetData.writeInt8(data[key]);
 							break;
@@ -129,7 +137,11 @@ class Client extends Player {
 		packet.writeVarInt(packetData.data().length);
 		packet.write(packetData.data());
 
-		this.socket.write(packet.data());
+		this.writeRaw(packet.data());
+	}
+
+	writeRaw(data) {
+		this.socket.write(data);
 	}
 
 	static handlePacket(stream) {

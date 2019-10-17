@@ -1,3 +1,4 @@
+const uuidParse = require('uuid-parse');
 const MCServerError = require('./errors/mcserver.error');
 
 class BufferStreamReadable {
@@ -261,6 +262,119 @@ class BufferStreamWritable {
 		buffer.writeInt32BE(((data.y & 0b111111) << 26) | (data.z & 0x3FFFFFF), 4);
 
 		this.write(buffer);
+	}
+
+	writeBuffer(buffer, { countType }) {
+		if (countType === 'varint') {
+			this.writeVarInt(buffer.length);
+		} else {
+			throw new MCServerError(`Unhandled buffer countType ${countType}`);
+		}
+
+		this.write(buffer);
+	}
+
+	writeArray(array, { countType, type: arrayType }, data) {
+		let properties;
+
+		if (arrayType instanceof Array) {
+			properties = arrayType[1];
+			arrayType = arrayType[0];
+		}
+
+		if (countType === 'varint') {
+			this.writeVarInt(array.length);
+		} else {
+			throw new MCServerError(`Unhandled array countType ${countType}`);
+		}
+
+		for (const entry of array) {
+			if (arrayType === 'container') {
+				for (const property of properties) {
+					const { name } = property;
+					let { type: propertyType } = property;
+
+					if (!entry.hasOwnProperty(name)) {
+						continue;
+					}
+
+					const value = entry[name];
+					let options;
+					if (propertyType instanceof Array) {
+						options = propertyType[1];
+						propertyType = propertyType[0];
+					}
+
+					switch (propertyType) {
+						case 'UUID':
+							this.writeUUID(value);
+							break;
+						case 'switch':
+							this.writeSwitch(value, options, data);
+							break;
+					
+						default:
+							throw new MCServerError(`Unhandled array propertyType ${propertyType}`);
+					}
+				}
+			}
+		}
+	}
+
+	writeUUID(uuid) {
+		this.write(Buffer.from(uuidParse.parse(uuid)));
+	}
+
+	writeSwitch(value, options, data) {
+		const { compareTo, fields, default: defaultType } = options;
+		const compareValue = data[compareTo.replace(/[./]/g, '')]; // sometimes this is something like '../whatever', so get rid of the '../' because only 'whatever' is needed
+		let type = fields[compareValue] || defaultType;
+
+		if (type instanceof Array) {
+			options = type[1];
+			type = type[0];
+		}
+
+		switch (type) {
+			case 'void':
+				break;
+			case 'string':
+				this.writeString(value);
+				break;
+			case 'array':
+				this.writeArray(value, options, data);
+				break;
+			case 'option':
+				this.writeOptional(value, options, data);
+				break;
+			case 'varint':
+				this.writeVarInt(value);
+				break;
+			case 'u8':
+				this.writeUInt8(value);
+				break;
+			case 'f32':
+				this.writeFloatBE(value);
+				break;
+			default:
+				throw new MCServerError(`Unhandled switch type ${type}`);
+		}
+	}
+
+	writeOptional(value, type) {
+		if (value === null) {
+			return this.writeBool(false);
+		}
+
+		this.writeBool(true);
+
+		switch (type) {
+			case 'string':
+				this.writeString(value);
+				break;
+			default:
+				throw new MCServerError(`Unhandled option type ${type}`);
+		}
 	}
 }
 
