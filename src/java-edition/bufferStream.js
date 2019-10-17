@@ -376,6 +376,13 @@ class BufferStreamWritable {
 				throw new MCServerError(`Unhandled option type ${type}`);
 		}
 	}
+
+	writeEntityMetadata(value) {
+		if (value.length === 0) {
+			this.writeUInt8(0xff);
+			return;
+		}
+	}
 }
 
 module.exports = {

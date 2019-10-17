@@ -108,6 +108,9 @@ class Client extends Player {
 						case 'switch':
 							packetData.writeSwitch(data[key], definition.options, data);
 							break;
+						case 'entityMetadata':
+							packetData.writeEntityMetadata(data[key]);
+							break;
 						case 'i8':
 							packetData.writeInt8(data[key]);
 							break;
