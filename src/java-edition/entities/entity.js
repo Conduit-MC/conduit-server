@@ -9,6 +9,15 @@ class Entity extends EventEmitter {
 
 		this.eid = this.server.nextEntityId();
 		this.uuid = UUID1345.v1();
+
+		this.position = {
+			x: 0,
+			y: 0,
+			z: 0,
+			pitch: 0,
+			yaw: 0,
+			onGround: true
+		};
 	}
 
 	getEntityId() {
@@ -17,6 +26,22 @@ class Entity extends EventEmitter {
 
 	getUUID() {
 		return this.uuid;
+	}
+
+	getPosition() {
+		return this.position;
+	}
+
+	setPosition() {
+
+	}
+
+	updatePosition({ x, y, z, onGround, pitch = this.getPosition().pitch, yaw = this.getPosition().yaw }) {
+		this.position = {
+			x: x, y: y, z: z,
+			pitch, yaw,
+			onGround
+		};
 	}
 }
 

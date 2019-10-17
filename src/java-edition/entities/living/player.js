@@ -4,16 +4,7 @@ class Player extends Entity {
 	constructor(server) {
 		super(server);
 
-		this._position = {
-			x: 8,
-			y: 1,
-			z: 8,
-			pitch: 0,
-			yaw: 0,
-			onGround: true
-		};
-
-		this._currentTeleportId = 0;
+		this.currentTeleportId = 0;
 
 		this.in_game = false;
 	}
@@ -27,7 +18,7 @@ class Player extends Entity {
 	}
 
 	nextTeleportId() {
-		return ++this._currentTeleportId;
+		return ++this.currentTeleportId;
 	}
 
 	joinGame() {
@@ -48,7 +39,7 @@ class Player extends Entity {
 			action: 0,
 			data: Object.keys(this.server.getPlayers()).map(uuid => {
 				const player = this.server.getPlayers()[uuid];
-				
+
 				return {
 					UUID: player.getUUID(),
 					name: player.getUsername(),
@@ -62,14 +53,21 @@ class Player extends Entity {
 			})
 		});
 
-		this.updatePosition(this._position);
+		this.setPosition({
+			x: 8,
+			y: 1,
+			z: 8,
+			pitch: 0,
+			yaw: 0,
+			onGround: true
+		});
 
 		this.server.broadcast('named_entity_spawn', {
 			entityId: this.getEntityId(),
-			playerUUID: this.uuid,
-			x: this._position.x,
-			y: this._position.y,
-			z: this._position.z,
+			playerUUID: this.getUUID(),
+			x: this.getPosition().x,
+			y: this.getPosition().y,
+			z: this.getPosition().z,
 			yaw: 0,
 			pitch: 0,
 			currentItem: 0,
@@ -78,10 +76,35 @@ class Player extends Entity {
 
 		this.server.broadcast('entity_teleport', {
 			entityId: this.getEntityId(),
-			...this._position
+			...this.getPosition()
 		}, this);
 
 		this.broadcastJoinMessage();
+
+		for (const uuid in this.server.getPlayers()) {
+			const player = this.server.getPlayers()[uuid];
+
+			if (player.getEntityId() === this.getEntityId()) {
+				continue;
+			}
+
+			this.write('named_entity_spawn', {
+				entityId: player.getEntityId(),
+				playerUUID: player.getUUID(),
+				x: player.getPosition().x,
+				y: player.getPosition().y,
+				z: player.getPosition().z,
+				yaw: 0,
+				pitch: 0,
+				currentItem: 0,
+				metadata: []
+			});
+	
+			this.write('entity_teleport', {
+				entityId: player.getEntityId(),
+				...player.getPosition()
+			});
+		}
 
 		this.in_game = true;
 
@@ -184,15 +207,15 @@ class Player extends Entity {
 		return this;
 	}
 
-	updatePosition({ x, y, z, onGround, pitch = this._position.pitch, yaw = this._position.yaw }) {
-		this._position = {
+	setPosition({ x, y, z, onGround, pitch = this.getPosition().pitch, yaw = this.getPosition().yaw }) {
+		this.updatePosition({
 			x: x, y: y, z: z,
 			pitch, yaw,
 			onGround
-		};
+		});
 
 		this.write('position', {
-			...this._position,
+			...this.getPosition(),
 			flags: 0x00,
 			teleportId: this.nextTeleportId()
 		});
