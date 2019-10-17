@@ -51,11 +51,7 @@ class Player extends Entity {
 				gamemode: 0,
 				ping: 40,
 				displayName: JSON.stringify({
-					translate: 'multiplayer.player.joined',
-					'with': [
-						this.getUsername()
-					],
-					color: 'yellow'
+					text: this.getUsername()
 				})
 			}]
 		});
