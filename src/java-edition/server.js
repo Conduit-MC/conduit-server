@@ -348,7 +348,6 @@ class MCServer extends EventEmitter {
 				continue;
 			}
 
-			console.log('writing', name, 'to player', player.getUsername());
 			player.write(name, data);
 		}
 	}
