@@ -2,7 +2,7 @@
 
 Conduit is a custom Minecraft server written from the ground up in NodeJS
 
-![Example gif](https://i.imgur.com/TeuuWTB.gif)
+![Example gif](https://i.imgur.com/Ym9dpLJ.gif)
 
 **THIS IS NOT MEANT TO BE USED AS A PRACTICAL ALTERNATIVE TO EXISTING SERVERS** (yet). I started this for fun to see if I could. Many things do not work.
 
@@ -17,7 +17,7 @@ I would eventually like to make this server feature-complete and have it be a vi
 - [x] Login/join handshake
 - [ ] Authentication
 - [x] Server Joining
-- [ ] World rendering
+- [x] World rendering (Partially done. Chunks can render, but world generation does not exist yet)
 - [ ] World generating
 - [ ] World saving
 - [ ] World interactions
