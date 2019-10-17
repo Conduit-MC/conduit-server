@@ -344,7 +344,7 @@ class MCServer extends EventEmitter {
 		for (const uuid in this.players) {
 			const player = this.players[uuid];
 
-			if (except && player.id === except.id) {
+			if (except && player.getEntityId() === except.getEntityId()) {
 				continue;
 			}
 
