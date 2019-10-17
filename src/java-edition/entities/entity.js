@@ -38,7 +38,7 @@ class Entity extends EventEmitter {
 
 	updatePosition({ x, y, z, onGround, pitch = this.getPosition().pitch, yaw = this.getPosition().yaw }) {
 		this.position = {
-			x: x, y: y, z: z,
+			x, y, z,
 			pitch, yaw,
 			onGround
 		};
