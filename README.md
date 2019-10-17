@@ -21,13 +21,13 @@ I would eventually like to make this server feature-complete and have it be a vi
 - [ ] World generating
 - [ ] World saving
 - [ ] World interactions
-- [ ] Player/entity rendering
+- [x] Player/entity rendering
 - [ ] Player/entity saving
 - [x] Chat
 - [x] Command handling
 - [ ] Implement all vanilla commands
 - [ ] Entity spawning
-- [ ] Movement
+- [x] Movement (Mostly done. Entities now move and rotate as normal, but no checks for illegal movement are done yet)
 - [ ] Entity interactions
 - [x] Basic plugin system
 
