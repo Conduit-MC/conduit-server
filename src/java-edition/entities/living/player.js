@@ -46,16 +46,20 @@ class Player extends Entity {
 		// TODO: Loop over every player and add them to the array
 		this.server.broadcast('player_info', {
 			action: 0,
-			data: [{
-				UUID: this.getUUID(),
-				name: this.getUsername(),
-				properties: [],
-				gamemode: 0,
-				ping: 40,
-				displayName: JSON.stringify({
-					text: this.getUsername()
-				})
-			}]
+			data: Object.keys(this.server.getPlayers()).map(uuid => {
+				const player = this.server.getPlayers()[uuid];
+				
+				return {
+					UUID: player.getUUID(),
+					name: player.getUsername(),
+					properties: [],
+					gamemode: 0,
+					ping: 40,
+					displayName: JSON.stringify({
+						text: player.getUsername()
+					})
+				};
+			})
 		});
 
 		this.updatePosition(this._position);

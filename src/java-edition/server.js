@@ -332,6 +332,10 @@ class MCServer extends EventEmitter {
 		}, 20000); // wiki.vg states to send this every 30 seconds, lets send it every 20 just to be safe
 	}
 
+	getPlayers() {
+		return this.players;
+	}
+
 	nextEntityId() {
 		return ++this.current_eid;
 	}
