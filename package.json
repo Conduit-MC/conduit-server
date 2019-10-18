@@ -20,6 +20,7 @@
     "minecraft-data": "^2.39.1",
     "node-rsa": "^0.4.2",
     "prismarine-chunk": "^1.11.0",
+    "spiralloop": "^1.0.2",
     "uuid-1345": "^0.99.6",
     "uuid-parse": "^1.1.0"
   },

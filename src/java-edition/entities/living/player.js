@@ -1,3 +1,4 @@
+const spiral = require('spiralloop');
 const Entity = require('../entity');
 
 class Player extends Entity {
@@ -7,6 +8,15 @@ class Player extends Entity {
 		this.currentTeleportId = 0;
 
 		this.in_game = false;
+
+		this.settings = {
+			locale: 'en_us',
+			viewDistance: 5,
+			chatFlags: 0,
+			chatColors: 0,
+			skinParts: 0,
+			mainHand: 0
+		};
 	}
 
 	getServer() {
@@ -19,6 +29,22 @@ class Player extends Entity {
 
 	nextTeleportId() {
 		return ++this.currentTeleportId;
+	}
+
+	getSettings() {
+		return this.settings;
+	}
+
+	setSettings(settings) {
+		const oldViewDistance = this.settings.viewDistance;
+
+		this.settings = settings;
+
+		if (oldViewDistance !== this.settings.viewDistance) { // view distance changed, send new chunks
+			this.sendNearbyChunks();
+		}
+
+		return this;
 	}
 
 	joinGame() {
@@ -55,12 +81,14 @@ class Player extends Entity {
 
 		this.setPosition({
 			x: 8,
-			y: 1,
+			y: 150,
 			z: 8,
 			pitch: 0,
 			yaw: 0,
-			onGround: true
+			onGround: false
 		});
+
+		this.sendNearbyChunks();
 
 		this.server.broadcast('named_entity_spawn', {
 			entityId: this.getEntityId(),
@@ -221,6 +249,29 @@ class Player extends Entity {
 		});
 
 		return this;
+	}
+
+	sendNearbyChunks() {
+		const chunkX = this.getPosition().x >> 4;
+		const chunkZ = this.getPosition().z >> 4;
+
+		const { viewDistance } = this.getSettings();
+
+		spiral([viewDistance * 2, viewDistance * 2], (xPos, zPos) => {
+			const x = chunkX - viewDistance + xPos;
+			const z = chunkZ - viewDistance + zPos;
+
+			const chunk = this.getServer().world.getChunk(x, z);
+
+			this.write('map_chunk', {
+				x,
+				z,
+				groundUp: true,
+				bitMap: 0xffff,
+				chunkData: chunk.dump(),
+				blockEntities: []
+			});
+		});
 	}
 
 	openWindow({ type, title, slots }) {

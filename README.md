@@ -18,6 +18,7 @@ I would eventually like to make this server feature-complete and have it be a vi
 - [ ] Authentication
 - [x] Server Joining
 - [x] World rendering (Partially done. Chunks can render, but world generation does not exist yet)
+- [x] World loading from disk (Partially done. Worlds can be loaded from disk but only on initial login. New chunks are not loaded when player moves)
 - [ ] World generating
 - [ ] World saving
 - [ ] World interactions

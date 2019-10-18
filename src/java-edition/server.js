@@ -20,7 +20,7 @@ const Client = require('./client');
 const RCON = require('./rcon');
 const Query = require('./query');
 
-const World = require('./world');
+const { World } = require('./world');
 
 class MCServer extends EventEmitter {
 	constructor(version, properties = {}) {
@@ -28,6 +28,10 @@ class MCServer extends EventEmitter {
 
 		// protocol spec for given server version
 		this.data = MCData(version);
+
+		this.version = version; // Minecraft version
+		this.protocolVersion = this.data.version.version; // Protocol version
+		this.properties = properties; // server properties
 
 		// key pair for Encryption Request packet (currently unused)
 		this.key = new RSA({ b: 1024 });
@@ -42,11 +46,7 @@ class MCServer extends EventEmitter {
 		this.commands = {}; // command handlers
 
 		// the world used on the server (currently unused)
-		this.world = new World();
-
-		this.version = version; // Minecraft version
-		this.protocolVersion = this.data.version.version; // Protocol version
-		this.properties = properties; // server properties
+		this.world = new World(this);
 
 		// server sockets
 		this.udp_socket = udp_socket;

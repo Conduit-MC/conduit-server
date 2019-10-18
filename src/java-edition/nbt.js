@@ -4,6 +4,10 @@ const zlib = require('zlib');
 const PassThrough = require('stream').PassThrough;
 
 const GZIP_HEADER = Buffer.from('1F8B', 'hex');
+const ZLIB_HEADER_LOW = Buffer.from('7801', 'hex');
+const ZLIB_HEADER_DEFAULT = Buffer.from('789C', 'hex');
+const ZLIB_HEADER_BEST = Buffer.from('78DA', 'hex');
+
 const TAG_TYPES = {
 	END: 0x00,
 	BYTE: 0x01,
@@ -27,6 +31,10 @@ class NBT {
 	parse(nbt) {
 		if (isGZipped(nbt)) {
 			nbt = zlib.gunzipSync(nbt);
+		}
+
+		if (isZlib(nbt)) {
+			nbt = zlib.unzipSync(nbt);
 		}
 
 		this.nbt = new PassThrough();
@@ -85,7 +93,7 @@ class NBT {
 	}
 
 	readByte() {
-		return this.nbt.read(1).readInt8();
+		return this.nbt.read(1).readUInt8();
 	}
 
 	readShort() {
@@ -160,6 +168,12 @@ class NBT {
 
 function isGZipped(buffer) {
 	return buffer.subarray(0x00, 0x02).equals(GZIP_HEADER);
+}
+
+function isZlib(buffer) {
+	const MAGIC = buffer.subarray(0x00, 0x02);
+
+	return (MAGIC.equals(ZLIB_HEADER_LOW) || MAGIC.equals(ZLIB_HEADER_DEFAULT) || MAGIC.equals(ZLIB_HEADER_BEST));
 }
 
 function readInt64BE(buffer) {
