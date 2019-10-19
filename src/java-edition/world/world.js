@@ -96,7 +96,7 @@ class World {
 module.exports = World;
 
 function nibble4(array, index) {
-	const byte = array[index/2];
+	const byte = array[index >> 1];
 
 	return index % 2 ? (byte >> 4) & 0x0F : byte & 0x0F;
 }
